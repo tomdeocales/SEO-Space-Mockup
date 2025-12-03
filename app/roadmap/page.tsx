@@ -6,6 +6,7 @@ import { TopBar } from "@/components/top-bar"
 import { RoadmapView } from "@/components/roadmap-view"
 import { PageLoader } from "@/components/ui/spinner"
 import { useToast } from "@/components/ui/toast-banner"
+import { RequireAuth } from "@/components/require-auth"
 
 function RoadmapContent() {
   const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
@@ -23,15 +24,17 @@ function RoadmapContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+    <RequireAuth>
+      <div className="min-h-screen bg-background">
+        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
 
-      <div className="pl-64">
-        <TopBar title="Product Roadmap" />
+        <div className="pl-64">
+          <TopBar title="Product Roadmap" />
 
-        <main className="p-6">{isLoading ? <PageLoader /> : <RoadmapView competitor={competitor} />}</main>
+          <main className="p-6">{isLoading ? <PageLoader /> : <RoadmapView competitor={competitor} />}</main>
+        </div>
       </div>
-    </div>
+    </RequireAuth>
   )
 }
 

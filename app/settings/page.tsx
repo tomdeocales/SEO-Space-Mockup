@@ -12,6 +12,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal"
 import { useToast } from "@/components/ui/toast-banner"
 import { PageLoader } from "@/components/ui/spinner"
 import { User, Bell, Key, Building2, Eye, EyeOff } from "lucide-react"
+import { RequireAuth } from "@/components/require-auth"
 
 export default function SettingsPage() {
   const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
@@ -48,17 +49,18 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+    <RequireAuth>
+      <div className="min-h-screen bg-background">
+        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
 
-      <div className="pl-64">
-        <TopBar title="Settings" />
+        <div className="pl-64">
+          <TopBar title="Settings" />
 
-        <main className="p-6 space-y-6">
-          {isLoading ? (
-            <PageLoader />
-          ) : (
-            <>
+          <main className="p-6 space-y-6">
+            {isLoading ? (
+              <PageLoader />
+            ) : (
+              <>
               {/* Account Settings */}
               <Card className="border border-border">
                 <CardHeader>
@@ -169,24 +171,25 @@ export default function SettingsPage() {
               </Card>
 
               {/* Save Button */}
-              <div className="flex justify-end">
-                <Button onClick={() => setShowSaveModal(true)}>Save Changes</Button>
-              </div>
-            </>
-          )}
-        </main>
-      </div>
+                <div className="flex justify-end">
+                  <Button onClick={() => setShowSaveModal(true)}>Save Changes</Button>
+                </div>
+              </>
+            )}
+          </main>
+        </div>
 
-      {/* Save Confirmation Modal */}
-      <ConfirmModal
-        open={showSaveModal}
-        onClose={() => setShowSaveModal(false)}
-        onConfirm={handleSaveSettings}
-        title="Save Settings"
-        description="Are you sure you want to save these changes to your settings?"
-        confirmText="Save"
-        loading={saving}
-      />
-    </div>
+        {/* Save Confirmation Modal */}
+        <ConfirmModal
+          open={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          onConfirm={handleSaveSettings}
+          title="Save Settings"
+          description="Are you sure you want to save these changes to your settings?"
+          confirmText="Save"
+          loading={saving}
+        />
+      </div>
+    </RequireAuth>
   )
 }

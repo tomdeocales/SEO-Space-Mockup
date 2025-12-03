@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Grid3X3, Calendar, Search, Mail, Settings, HelpCircle, Command } from "lucide-react"
+import { LayoutDashboard, Grid3X3, Calendar, Search, Mail, Settings, HelpCircle, Command, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuth } from "@/components/auth-provider"
 
 const dashboardItems = [
   { href: "/", label: "Parity Overview", icon: LayoutDashboard },
@@ -27,6 +28,8 @@ interface SidebarProps {
 
 export function Sidebar({ competitor, onCompetitorChange, isLoading = false }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { logout } = useAuth()
 
   const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
     if (newCompetitor !== competitor) {
@@ -160,11 +163,17 @@ export function Sidebar({ competitor, onCompetitorChange, isLoading = false }: S
             <p className="text-sm font-medium text-sidebar-foreground truncate">Product Manager</p>
             <p className="text-xs text-muted-foreground truncate">pm@seospace.io</p>
           </div>
-          <Link href="/settings">
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => {
+              logout()
+              router.replace("/login")
+            }}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </aside>
