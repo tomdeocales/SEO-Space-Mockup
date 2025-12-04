@@ -11,7 +11,7 @@ interface KPICardProps {
   trend?: "up" | "down" | "neutral"
   trendValue?: string
   trendDescription?: string
-  variant?: "default" | "success" | "warning" | "danger"
+  variant?: "default" | "success" | "warning" | "danger" | "hero"
 }
 
 export function KPICard({
@@ -23,18 +23,31 @@ export function KPICard({
   trendDescription,
   variant = "default",
 }: KPICardProps) {
+  const isHero = variant === "hero"
+
   return (
-    <Card className="bg-card border border-border hover:shadow-sm transition-shadow">
-      <CardContent className="p-5">
+    <Card
+      className={cn(
+        "bg-card border border-border hover:shadow-md transition-all",
+        isHero && "bg-primary text-primary-foreground border-primary",
+      )}
+    >
+      <CardContent className="p-6">
         <div className="flex items-start justify-between">
-          <span className="text-sm text-muted-foreground">{title}</span>
+          <span className={cn("text-sm font-medium", isHero ? "text-primary-foreground/80" : "text-muted-foreground")}>
+            {title}
+          </span>
           {trend && trendValue && (
             <div
               className={cn(
-                "flex items-center gap-1 text-xs font-medium",
-                trend === "up" && "text-status-ahead",
-                trend === "down" && "text-status-behind",
-                trend === "neutral" && "text-muted-foreground",
+                "flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full",
+                isHero
+                  ? "bg-white/20 text-white"
+                  : trend === "up"
+                    ? "bg-status-ahead/10 text-status-ahead"
+                    : trend === "down"
+                      ? "bg-status-behind/10 text-status-behind"
+                      : "bg-muted text-muted-foreground",
               )}
             >
               {trend === "up" && <TrendingUp className="h-3 w-3" />}
@@ -43,11 +56,21 @@ export function KPICard({
             </div>
           )}
         </div>
-        <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-3xl font-bold tracking-tight text-foreground">{value}</span>
-          {subtitle && <span className="text-base text-muted-foreground">{subtitle}</span>}
+        <div className="mt-4 flex items-baseline gap-1">
+          <span className={cn("text-3xl font-bold tracking-tight", isHero ? "text-primary-foreground" : "text-foreground")}>
+            {value}
+          </span>
+          {subtitle && (
+            <span className={cn("text-base", isHero ? "text-primary-foreground/80" : "text-muted-foreground")}>
+              {subtitle}
+            </span>
+          )}
         </div>
-        {trendDescription && <p className="mt-1 text-sm text-muted-foreground">{trendDescription}</p>}
+        {trendDescription && (
+          <p className={cn("mt-1 text-sm", isHero ? "text-primary-foreground/80" : "text-muted-foreground")}>
+            {trendDescription}
+          </p>
+        )}
       </CardContent>
     </Card>
   )

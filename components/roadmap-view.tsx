@@ -70,7 +70,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
       <Card
         onClick={() => router.push(`/feature/${feature.id}`)}
         className={cn(
-          "cursor-pointer transition-all hover:shadow-sm hover:border-foreground/20 border border-border",
+          "cursor-pointer transition-all hover:shadow-md hover:border-foreground/30 border border-border",
           isHighlighted && "ring-2 ring-foreground ring-offset-2 animate-pulse",
           isCompleted && "bg-muted/40",
         )}

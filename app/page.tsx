@@ -1,6 +1,7 @@
 "use client"
 import { Sidebar } from "@/components/sidebar"
 import { TopBar } from "@/components/top-bar"
+import { ParityRadarChart } from "@/components/parity-radar-chart"
 import { KPICard } from "@/components/kpi-card"
 import { CategoryHeatmap } from "@/components/category-heatmap"
 import { GapsTable } from "@/components/gaps-table"
@@ -39,6 +40,7 @@ export default function ParityOverview() {
                     trend={parityScore >= 70 ? "up" : parityScore >= 50 ? "neutral" : "down"}
                     trendValue={parityScore >= 70 ? "+12%" : "-8%"}
                     trendDescription={parityScore >= 70 ? "Good standing overall" : "Needs improvement"}
+                    variant="hero"
                   />
                   <KPICard
                     title="Features Behind"
@@ -63,8 +65,15 @@ export default function ParityOverview() {
                   />
                 </div>
 
-                {/* Category Heatmap */}
-                <CategoryHeatmap competitor={competitor} />
+                {/* Parity Analysis Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-1">
+                    <ParityRadarChart competitor={competitor} />
+                  </div>
+                  <div className="lg:col-span-2">
+                    <CategoryHeatmap competitor={competitor} compact />
+                  </div>
+                </div>
 
                 {/* Top Gaps Table */}
                 <GapsTable competitor={competitor} />
