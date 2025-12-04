@@ -28,7 +28,7 @@ export function KPICard({
   return (
     <Card
       className={cn(
-        "bg-card border border-border hover:shadow-md transition-all",
+        "bg-card border border-border transition-all",
         isHero && "bg-primary text-primary-foreground border-primary",
       )}
     >

@@ -52,7 +52,7 @@ export default function ReportsPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-white">
         <Sidebar
           competitor={competitor}
           onCompetitorChange={setCompetitor}

@@ -13,7 +13,7 @@ function RoadmapContent() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-white">
         <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">

@@ -81,7 +81,7 @@ export function TopBar({ title }: TopBarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-white px-6">
       <h1 className="text-lg font-semibold text-foreground">{title}</h1>
 
       <div className="flex items-center gap-2">
