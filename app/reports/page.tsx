@@ -75,7 +75,7 @@ export default function ReportsPage() {
             ) : (
               <Card className="border border-border">
                 <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="space-y-3">
                     <div>
                       <CardTitle className="text-base font-semibold flex items-center gap-2">
                         <FileText className="h-5 w-5 text-muted-foreground" />
