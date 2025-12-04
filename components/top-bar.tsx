@@ -106,7 +106,7 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive animate-pulse" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 p-0">
+          <DropdownMenuContent align="end" className="w-[280px] sm:w-80 p-0">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <DropdownMenuLabel className="p-0 font-semibold">Notifications</DropdownMenuLabel>
               <button className="text-xs text-primary hover:underline font-medium">
