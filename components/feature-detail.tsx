@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, ExternalLink, FileText, Zap, Target, Clock } from "luc
 import { FormModal } from "@/components/ui/form-modal"
 import { useToast } from "@/components/ui/toast-banner"
 import { useFeatureAssignments } from "@/components/feature-assignments-provider"
+import { Trash2, CheckSquare, Square } from "lucide-react"
 
 interface FeatureDetailProps {
   feature: Feature
@@ -21,8 +22,8 @@ interface FeatureDetailProps {
 
 export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const router = useRouter()
-  const { getFeatureById, assignSprint } = useFeatureAssignments()
-  const featureData = getFeatureById(feature.id) ?? feature
+  const { getFeatureById, assignSprint, clearSprint, setStatus } = useFeatureAssignments()
+  const featureData = getFeatureById(feature.id) ?? { ...feature, status: "not_started" as const }
   const parityStatus = getParityStatus(featureData, competitor)
   const priorityScore = getCompetitorPriority(featureData, competitor)
   const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
@@ -40,8 +41,16 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const [adding, setAdding] = useState(false)
 
   const [showReassignModal, setShowReassignModal] = useState(false)
+  const [showRemoveModal, setShowRemoveModal] = useState(false)
 
   const currentSprint = featureData.sprint
+  const isCompleted = featureData.status === "completed"
+
+  const toggleCompleted = () => {
+    const nextStatus = isCompleted ? "in_progress" : "completed"
+    setStatus(featureData.id, nextStatus)
+    showToast(nextStatus === "completed" ? "Feature marked as completed" : "Status updated", "success")
+  }
 
   const getStatusBadge = () => {
     if (parityStatus === "full") {
@@ -132,6 +141,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             <Badge variant="outline">{featureData.category}</Badge>
             {getPriorityBadge()}
             {getStatusBadge()}
+            <Badge variant="secondary">{isCompleted ? "Completed" : featureData.status === "in_progress" ? "In Progress" : "Not Started"}</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-2">{gapMessage}</p>
         </div>
@@ -390,6 +400,26 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             <Plus className="h-4 w-4 mr-2" />
             {featureData.sprint ? "Reassign Sprint" : "Add to Roadmap"}
           </Button>
+          {featureData.sprint && (
+            <>
+              <div className="flex gap-2">
+                <Button variant={isCompleted ? "secondary" : "outline"} className="flex-1" onClick={toggleCompleted}>
+                  {isCompleted ? (
+                    <CheckSquare className="h-4 w-4 mr-2 text-green-600" />
+                  ) : (
+                    <Square className="h-4 w-4 mr-2 text-green-600" />
+                  )}
+                  {isCompleted ? "Completed" : "Mark as Completed"}
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRemoveModal(true)}>
+                  <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+                  Remove from Roadmap
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -458,6 +488,24 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </FormModal>
+
+      <FormModal
+        open={showRemoveModal}
+        onClose={() => setShowRemoveModal(false)}
+        title="Remove from Roadmap?"
+        onSubmit={() => {
+          setShowRemoveModal(false)
+          clearSprint(featureData.id)
+          showToast("Feature removed from roadmap", "success")
+        }}
+        submitText="Remove"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            This will remove this feature from the roadmap, but the feature will still exist in SEO Space.
+          </p>
         </div>
       </FormModal>
     </div>

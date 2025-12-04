@@ -29,6 +29,15 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
     3: features.filter((f) => f.sprint === 3),
   }
 
+  const effortToPoints = (effort: string) => (effort === "S" ? 1 : effort === "M" ? 3 : 5)
+
+  const getSprintVelocity = (sprint: number) => {
+    const list = sprintFeatures[sprint as keyof typeof sprintFeatures]
+    const completed = list.filter((f) => (f as any).status === "completed")
+    const points = completed.reduce((sum, f) => sum + effortToPoints(f.effort), 0)
+    return { points, completedCount: completed.length, total: list.length }
+  }
+
   const kanbanColumns = {
     backlog: features.filter((f) => f.roadmapStatus === "not_planned" && f.priorityScore >= 80),
     planned: features.filter((f) => f.roadmapStatus === "planned"),
@@ -55,6 +64,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
   const FeatureCard = ({ feature, isHighlighted }: { feature: Feature; isHighlighted: boolean }) => {
     const isGap = feature.seoSpace < feature[competitor]
     const priorityScore = getCompetitorPriority(feature, competitor)
+    const isCompleted = (feature as any).status === "completed"
 
     return (
       <Card
@@ -62,6 +72,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
         className={cn(
           "cursor-pointer transition-all hover:shadow-sm hover:border-foreground/20 border border-border",
           isHighlighted && "ring-2 ring-foreground ring-offset-2 animate-pulse",
+          isCompleted && "bg-muted/40",
         )}
       >
         <CardContent className="p-4">
@@ -89,6 +100,10 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
               </Badge>
             )}
 
+            {isCompleted && (
+              <Badge variant="secondary" className="text-xs">Completed</Badge>
+            )}
+
             <div className="flex items-center gap-1 ml-auto">
               {feature.semrush > feature.seoSpace && (
                 <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-muted text-foreground text-xs font-bold">
@@ -102,6 +117,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
               )}
             </div>
           </div>
+
         </CardContent>
       </Card>
     )
@@ -152,6 +168,10 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
                       <h3 className="font-semibold text-sm">Sprint {sprint}</h3>
                       <p className="text-xs text-muted-foreground">
                         {sprintFeatures[sprint as keyof typeof sprintFeatures].length} features
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Velocity: {getSprintVelocity(sprint).points} pts · Completed: {getSprintVelocity(sprint).completedCount} /
+                        {getSprintVelocity(sprint).total}
                       </p>
                     </div>
                   </div>
