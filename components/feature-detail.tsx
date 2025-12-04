@@ -25,6 +25,13 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
   const { showToast } = useToast()
 
+  const gapMessage =
+    parityStatus === "full"
+      ? `SEO Space is on par with ${competitorLabel} for this feature.`
+      : parityStatus === "partial"
+        ? `SEO Space is partially on par with ${competitorLabel}; some components still need work.`
+        : `SEO Space is missing key components compared to ${competitorLabel}.`
+
   const [showRoadmapModal, setShowRoadmapModal] = useState(false)
   const [selectedSprint, setSelectedSprint] = useState("")
   const [adding, setAdding] = useState(false)
@@ -35,20 +42,20 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
     if (parityStatus === "full") {
       return (
         <Badge variant="outline" className="border-status-ahead/50 text-status-ahead bg-status-ahead/10">
-          On Par vs {competitorLabel}
+          Full vs {competitorLabel}
         </Badge>
       )
     }
     if (parityStatus === "partial") {
       return (
         <Badge variant="outline" className="border-status-partial/50 text-status-partial bg-status-partial/10">
-          Gap vs {competitorLabel}
+          Gap vs {competitorLabel} (Partial)
         </Badge>
       )
     }
     return (
       <Badge variant="outline" className="border-status-behind/50 text-status-behind bg-status-behind/10">
-        Missing vs {competitorLabel}
+        Gap vs {competitorLabel} (Missing)
       </Badge>
     )
   }
@@ -56,10 +63,13 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const getPriorityBadge = () => {
     return (
       <Badge variant="secondary" className="font-medium">
-        Priority: {priorityScore}
+        Priority vs {competitorLabel}: {priorityScore}
       </Badge>
     )
   }
+
+  const getCardHighlight = (isActive: boolean) =>
+    cn("border border-border", isActive && "border-primary/50 shadow-sm bg-muted/40")
 
   const handleAddToRoadmap = () => {
     if (feature.sprint) {
@@ -113,6 +123,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             {getPriorityBadge()}
             {getStatusBadge()}
           </div>
+          <p className="text-sm text-muted-foreground mt-2">{gapMessage}</p>
         </div>
       </div>
 
@@ -125,9 +136,14 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
           </h2>
 
           {/* SEMrush Card */}
-          <Card className="border border-border">
+          <Card className={getCardHighlight(competitor === "semrush")}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center justify-between">
+              <CardTitle
+                className={cn(
+                  "text-sm flex items-center justify-between",
+                  competitor === "semrush" && "text-foreground font-semibold",
+                )}
+              >
                 <span className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center h-6 w-6 rounded bg-foreground text-background text-xs font-bold">
                     S
@@ -184,9 +200,14 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
           </Card>
 
           {/* peec Card */}
-          <Card className="border border-border">
+          <Card className={getCardHighlight(competitor === "peec")}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center justify-between">
+              <CardTitle
+                className={cn(
+                  "text-sm flex items-center justify-between",
+                  competitor === "peec" && "text-foreground font-semibold",
+                )}
+              >
                 <span className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center h-6 w-6 rounded bg-muted text-foreground text-xs font-bold">
                     P
@@ -227,6 +248,13 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                     ))}
                   </ul>
                 </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Job To Be Done
+                </h4>
+                <p className="text-sm bg-muted/50 rounded-lg p-3 italic">{feature.jtbd}</p>
               </div>
 
               <div className="border border-dashed border-border rounded-lg p-6 flex items-center justify-center bg-muted/30">
