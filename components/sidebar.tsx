@@ -24,14 +24,16 @@ interface SidebarProps {
   competitor: "semrush" | "peec"
   onCompetitorChange: (competitor: "semrush" | "peec") => void
   isLoading?: boolean
+  disableCompetitorToggle?: boolean
 }
 
-export function Sidebar({ competitor, onCompetitorChange, isLoading = false }: SidebarProps) {
+export function Sidebar({ competitor, onCompetitorChange, isLoading = false, disableCompetitorToggle = false }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { logout } = useAuth()
 
   const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
+    if (disableCompetitorToggle) return
     if (newCompetitor !== competitor) {
       onCompetitorChange(newCompetitor)
     }
@@ -71,9 +73,9 @@ export function Sidebar({ competitor, onCompetitorChange, isLoading = false }: S
           )}
           <button
             onClick={() => handleCompetitorChange("semrush")}
-            disabled={isLoading}
+            disabled={isLoading || disableCompetitorToggle}
             className={cn(
-              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-70",
               competitor === "semrush"
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",
@@ -83,9 +85,9 @@ export function Sidebar({ competitor, onCompetitorChange, isLoading = false }: S
           </button>
           <button
             onClick={() => handleCompetitorChange("peec")}
-            disabled={isLoading}
+            disabled={isLoading || disableCompetitorToggle}
             className={cn(
-              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-70",
               competitor === "peec"
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",

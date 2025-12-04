@@ -53,7 +53,12 @@ export default function ReportsPage() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
+        <Sidebar
+          competitor={competitor}
+          onCompetitorChange={setCompetitor}
+          isLoading={isSwitching}
+          disableCompetitorToggle
+        />
 
         <div className="pl-64">
           <TopBar title="Reports" />
