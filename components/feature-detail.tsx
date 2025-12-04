@@ -143,7 +143,6 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             {getStatusBadge()}
             <Badge variant="secondary">{isCompleted ? "Completed" : featureData.status === "in_progress" ? "In Progress" : "Not Started"}</Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">{gapMessage}</p>
         </div>
       </div>
 
