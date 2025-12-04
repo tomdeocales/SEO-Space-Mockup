@@ -732,3 +732,11 @@ export function getParityStatus(feature: Feature, competitor: "semrush" | "peec"
   if (feature.seoSpace === 1) return "partial"
   return "missing"
 }
+
+export function getCompetitorPriority(feature: Feature, competitor: "semrush" | "peec"): number {
+  const gapDelta = feature[competitor] - feature.seoSpace
+  const adjustment = gapDelta > 0 ? gapDelta * 5 : gapDelta < 0 ? gapDelta * 2 : 0
+  const adjustedPriority = feature.priorityScore + adjustment
+
+  return Math.max(0, Math.min(100, Math.round(adjustedPriority)))
+}

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
-import { features, categories, type Feature } from "@/lib/data"
+import { features, categories, type Feature, getParityStatus, getCompetitorPriority } from "@/lib/data"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Check, X, Circle, Search, Filter, RotateCcw } from "lucide-react"
 import { useToast } from "@/components/ui/toast-banner"
@@ -32,16 +32,27 @@ export function FeatureMapTable({ competitor }: FeatureMapTableProps) {
   const [filtersApplied, setFiltersApplied] = useState(false)
 
   const filteredFeatures = useMemo(() => {
-    return features.filter((feature) => {
-      if (categoryFilter !== "all" && feature.category !== categoryFilter) return false
-      if (parityFilter === "missing" && feature.seoSpace !== 0) return false
-      if (parityFilter === "partial" && feature.seoSpace !== 1) return false
-      if (parityFilter === "full" && feature.seoSpace !== 2) return false
-      if (feature.priorityScore < priorityRange[0] || feature.priorityScore > priorityRange[1]) return false
-      if (searchQuery && !feature.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
-      return true
-    })
-  }, [categoryFilter, parityFilter, priorityRange, searchQuery])
+    return features
+      .map((feature) => {
+        const parityStatus = getParityStatus(feature, competitor)
+        const priorityScore = getCompetitorPriority(feature, competitor)
+        return { feature, parityStatus, priorityScore }
+      })
+      .filter(({ feature, parityStatus, priorityScore }) => {
+        if (categoryFilter !== "all" && feature.category !== categoryFilter) return false
+        if (parityFilter !== "all" && parityStatus !== parityFilter) return false
+        if (priorityScore < priorityRange[0] || priorityScore > priorityRange[1]) return false
+        if (searchQuery && !feature.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+        return true
+      })
+  }, [categoryFilter, parityFilter, priorityRange, searchQuery, competitor])
+
+  const gapCount = useMemo(
+    () => features.filter((feature) => getParityStatus(feature, competitor) !== "full").length,
+    [competitor],
+  )
+
+  const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
 
   const handleApplyFilters = () => {
     setFiltersApplied(true)
@@ -91,7 +102,7 @@ export function FeatureMapTable({ competitor }: FeatureMapTableProps) {
           <div>
             <CardTitle className="text-base font-semibold">Feature Comparison Matrix</CardTitle>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Showing {filteredFeatures.length} of {features.length} features
+              Showing {filteredFeatures.length} of {features.length} features · {gapCount} gaps vs {competitorLabel}
             </p>
           </div>
         </div>
@@ -184,7 +195,7 @@ export function FeatureMapTable({ competitor }: FeatureMapTableProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredFeatures.map((feature, index) => (
+                  {filteredFeatures.map(({ feature, priorityScore }, index) => (
                     <TableRow
                       key={feature.id}
                       onClick={() => router.push(`/feature/${feature.id}`)}
@@ -233,7 +244,7 @@ export function FeatureMapTable({ competitor }: FeatureMapTableProps) {
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-foreground text-background font-semibold text-xs">
-                          {feature.priorityScore}
+                          {priorityScore}
                         </span>
                       </TableCell>
                       <TableCell>

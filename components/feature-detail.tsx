@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-import { type Feature, getParityStatus } from "@/lib/data"
+import { type Feature, getParityStatus, getCompetitorPriority } from "@/lib/data"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Plus, ExternalLink, FileText, Zap, Target, Clock } from "lucide-react"
 import { FormModal } from "@/components/ui/form-modal"
@@ -21,6 +21,8 @@ interface FeatureDetailProps {
 export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const router = useRouter()
   const parityStatus = getParityStatus(feature, competitor)
+  const priorityScore = getCompetitorPriority(feature, competitor)
+  const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
   const { showToast } = useToast()
 
   const [showRoadmapModal, setShowRoadmapModal] = useState(false)
@@ -33,20 +35,20 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
     if (parityStatus === "full") {
       return (
         <Badge variant="outline" className="border-status-ahead/50 text-status-ahead bg-status-ahead/10">
-          Ahead / On Par
+          On Par vs {competitorLabel}
         </Badge>
       )
     }
     if (parityStatus === "partial") {
       return (
         <Badge variant="outline" className="border-status-partial/50 text-status-partial bg-status-partial/10">
-          Partial
+          Gap vs {competitorLabel}
         </Badge>
       )
     }
     return (
       <Badge variant="outline" className="border-status-behind/50 text-status-behind bg-status-behind/10">
-        Missing
+        Missing vs {competitorLabel}
       </Badge>
     )
   }
@@ -54,7 +56,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const getPriorityBadge = () => {
     return (
       <Badge variant="secondary" className="font-medium">
-        Priority: {feature.priorityScore}
+        Priority: {priorityScore}
       </Badge>
     )
   }
@@ -385,7 +387,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             </div>
             <div className="flex items-center justify-between text-sm mt-1">
               <span className="text-muted-foreground">Priority</span>
-              <span className="font-medium">{feature.priorityScore}</span>
+              <span className="font-medium">{priorityScore}</span>
             </div>
           </div>
         </div>

@@ -1,39 +1,26 @@
 "use client"
 
-import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { TopBar } from "@/components/top-bar"
 import { FeatureDetail } from "@/components/feature-detail"
 import type { Feature } from "@/lib/data"
 import { PageLoader } from "@/components/ui/spinner"
-import { useToast } from "@/components/ui/toast-banner"
 import { RequireAuth } from "@/components/require-auth"
+import { useCompetitor } from "@/components/competitor-provider"
 
 export function FeaturePageClient({ feature }: { feature: Feature }) {
-  const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
-  const [isLoading, setIsLoading] = useState(false)
-  const { showToast } = useToast()
-
-  const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
-    if (newCompetitor === competitor) return
-    setIsLoading(true)
-    setTimeout(() => {
-      setCompetitor(newCompetitor)
-      setIsLoading(false)
-      showToast(`Switched to ${newCompetitor === "semrush" ? "SEMrush" : "peec"} comparison`, "info")
-    }, 500)
-  }
+  const { competitor, isSwitching, setCompetitor } = useCompetitor()
 
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">
           <TopBar title="Feature Detail" />
 
           <main className="p-6">
-            {isLoading ? <PageLoader /> : <FeatureDetail feature={feature} competitor={competitor} />}
+            {isSwitching ? <PageLoader /> : <FeatureDetail feature={feature} competitor={competitor} />}
           </main>
         </div>
       </div>

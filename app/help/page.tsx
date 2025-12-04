@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/toast-banner"
 import { PageLoader } from "@/components/ui/spinner"
 import { RequireAuth } from "@/components/require-auth"
 import { HelpCircle, Book, Mail, MessageSquare, ChevronDown, ChevronRight, ExternalLink } from "lucide-react"
+import { useCompetitor } from "@/components/competitor-provider"
 
 const faqs = [
   {
@@ -51,8 +52,7 @@ const docLinks = [
 ]
 
 export default function HelpPage() {
-  const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
-  const [isLoading, setIsLoading] = useState(false)
+  const { competitor, isSwitching, setCompetitor } = useCompetitor()
   const [showTicketModal, setShowTicketModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
@@ -62,15 +62,6 @@ export default function HelpPage() {
   const [ticketSubject, setTicketSubject] = useState("")
   const [ticketCategory, setTicketCategory] = useState("")
   const [ticketDescription, setTicketDescription] = useState("")
-
-  const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setCompetitor(newCompetitor)
-      setIsLoading(false)
-      showToast(`Switched to ${newCompetitor === "semrush" ? "SEMrush" : "peec"} comparison`, "info")
-    }, 500)
-  }
 
   const handleSubmitTicket = () => {
     if (!ticketSubject || !ticketCategory || !ticketDescription) {
@@ -91,13 +82,13 @@ export default function HelpPage() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">
           <TopBar title="Help & Support" />
 
           <main className="p-6 space-y-6">
-            {isLoading ? (
+            {isSwitching ? (
               <PageLoader />
             ) : (
               <>

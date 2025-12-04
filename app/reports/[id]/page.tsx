@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, use } from "react"
+import { use } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,22 +10,13 @@ import { useToast } from "@/components/ui/toast-banner"
 import { ArrowLeft, Download, FileText, Calendar, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { RequireAuth } from "@/components/require-auth"
+import { useCompetitor } from "@/components/competitor-provider"
 
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
-  const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
-  const [isLoading, setIsLoading] = useState(false)
+  const { competitor, isSwitching, setCompetitor } = useCompetitor()
   const { showToast } = useToast()
   const router = useRouter()
-
-  const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setCompetitor(newCompetitor)
-      setIsLoading(false)
-      showToast(`Switched to ${newCompetitor === "semrush" ? "SEMrush" : "peec"} comparison`, "info")
-    }, 500)
-  }
 
   const handleExport = () => {
     showToast("Exporting report...", "info")
@@ -37,7 +28,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">
           <TopBar title="Report Detail" />

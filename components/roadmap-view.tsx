@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { features, type Feature } from "@/lib/data"
+import { features, type Feature, getCompetitorPriority } from "@/lib/data"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Columns3 } from "lucide-react"
 
@@ -17,6 +17,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const highlightId = searchParams.get("highlight")
+  const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
 
   const [activeTab, setActiveTab] = useState("timeline")
 
@@ -35,6 +36,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
 
   const FeatureCard = ({ feature, isHighlighted }: { feature: Feature; isHighlighted: boolean }) => {
     const isGap = feature.seoSpace < feature[competitor]
+    const priorityScore = getCompetitorPriority(feature, competitor)
 
     return (
       <Card
@@ -48,7 +50,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
           <div className="flex items-start justify-between gap-2 mb-2">
             <h4 className="font-medium text-sm leading-tight">{feature.name}</h4>
             <span className="flex items-center justify-center h-6 w-6 rounded-full bg-foreground text-background font-semibold text-xs shrink-0">
-              {feature.priorityScore}
+              {priorityScore}
             </span>
           </div>
 
@@ -60,12 +62,12 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
                 variant="outline"
                 className="text-xs border-status-behind/50 text-status-behind bg-status-behind/10"
               >
-                Gap vs {competitor === "semrush" ? "SEMrush" : "peec"}
+                Gap vs {competitorLabel}
               </Badge>
             )}
             {!isGap && feature.seoSpace > feature[competitor] && (
               <Badge variant="outline" className="text-xs border-status-ahead/50 text-status-ahead bg-status-ahead/10">
-                Unique Advantage
+                Advantage vs {competitorLabel}
               </Badge>
             )}
 

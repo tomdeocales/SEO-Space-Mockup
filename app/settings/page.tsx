@@ -13,10 +13,10 @@ import { useToast } from "@/components/ui/toast-banner"
 import { PageLoader } from "@/components/ui/spinner"
 import { User, Bell, Key, Building2, Eye, EyeOff } from "lucide-react"
 import { RequireAuth } from "@/components/require-auth"
+import { useCompetitor } from "@/components/competitor-provider"
 
 export default function SettingsPage() {
-  const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
-  const [isLoading, setIsLoading] = useState(false)
+  const { competitor, isSwitching, setCompetitor } = useCompetitor()
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
@@ -30,15 +30,6 @@ export default function SettingsPage() {
   const [emailAlerts, setEmailAlerts] = useState(true)
   const [emailRoadmap, setEmailRoadmap] = useState(false)
 
-  const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setCompetitor(newCompetitor)
-      setIsLoading(false)
-      showToast(`Switched to ${newCompetitor === "semrush" ? "SEMrush" : "peec"} comparison`, "info")
-    }, 500)
-  }
-
   const handleSaveSettings = () => {
     setSaving(true)
     setTimeout(() => {
@@ -51,13 +42,13 @@ export default function SettingsPage() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">
           <TopBar title="Settings" />
 
           <main className="p-6 space-y-6">
-            {isLoading ? (
+            {isSwitching ? (
               <PageLoader />
             ) : (
               <>

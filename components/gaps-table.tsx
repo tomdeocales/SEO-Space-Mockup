@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { getTopGaps, getParityStatus, type Feature } from "@/lib/data"
+import { features, getParityStatus, type Feature, getCompetitorPriority } from "@/lib/data"
 import { useRouter } from "next/navigation"
 
 interface GapsTableProps {
@@ -12,7 +12,11 @@ interface GapsTableProps {
 
 export function GapsTable({ competitor }: GapsTableProps) {
   const router = useRouter()
-  const gaps = getTopGaps(competitor, 10)
+  const gaps = features
+    .filter((feature) => feature.seoSpace < feature[competitor])
+    .map((feature) => ({ feature, priorityScore: getCompetitorPriority(feature, competitor) }))
+    .sort((a, b) => b.priorityScore - a.priorityScore)
+    .slice(0, 10)
 
   const getStatusBadge = (feature: Feature) => {
     const status = getParityStatus(feature, competitor)
@@ -76,7 +80,7 @@ export function GapsTable({ competitor }: GapsTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {gaps.map((feature) => (
+              {gaps.map(({ feature, priorityScore }) => (
                 <TableRow
                   key={feature.id}
                   onClick={() => router.push(`/feature/${feature.id}`)}
@@ -88,7 +92,7 @@ export function GapsTable({ competitor }: GapsTableProps) {
                   </TableCell>
                   <TableCell className="text-center">
                     <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-foreground text-background font-semibold text-xs">
-                      {feature.priorityScore}
+                      {priorityScore}
                     </span>
                   </TableCell>
                   <TableCell>{getStatusBadge(feature)}</TableCell>

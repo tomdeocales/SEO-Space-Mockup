@@ -14,6 +14,7 @@ import { PageLoader } from "@/components/ui/spinner"
 import { FileText, Download, Plus, Eye, Calendar } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { RequireAuth } from "@/components/require-auth"
+import { useCompetitor } from "@/components/competitor-provider"
 
 const mockReports = [
   { id: "1", name: "Q4 Parity Analysis", type: "Parity Report", date: "2024-12-01", status: "completed" },
@@ -24,22 +25,12 @@ const mockReports = [
 ]
 
 export default function ReportsPage() {
-  const [competitor, setCompetitor] = useState<"semrush" | "peec">("semrush")
-  const [isLoading, setIsLoading] = useState(false)
+  const { competitor, isSwitching, setCompetitor } = useCompetitor()
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [reportType, setReportType] = useState("")
   const [generating, setGenerating] = useState(false)
   const { showToast } = useToast()
   const router = useRouter()
-
-  const handleCompetitorChange = (newCompetitor: "semrush" | "peec") => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setCompetitor(newCompetitor)
-      setIsLoading(false)
-      showToast(`Switched to ${newCompetitor === "semrush" ? "SEMrush" : "peec"} comparison`, "info")
-    }, 500)
-  }
 
   const handleGenerateReport = () => {
     if (!reportType) return
@@ -62,13 +53,13 @@ export default function ReportsPage() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <Sidebar competitor={competitor} onCompetitorChange={handleCompetitorChange} isLoading={isLoading} />
+        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
 
         <div className="pl-64">
           <TopBar title="Reports" />
 
           <main className="p-6">
-            {isLoading ? (
+            {isSwitching ? (
               <PageLoader />
             ) : (
               <Card className="border border-border">
