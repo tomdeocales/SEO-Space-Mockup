@@ -46,12 +46,12 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
           <main className="p-4 sm:p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9">
+            <div className="flex items-start gap-4">
+              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold text-foreground">Q4 Parity Analysis Report</h1>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground break-words">Q4 Parity Analysis Report</h1>
                 <div className="flex flex-wrap items-center gap-3 mt-2">
                   <Badge variant="secondary" className="text-xs">
                     <FileText className="h-3 w-3 mr-1" />
@@ -67,7 +67,8 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                   </span>
                 </div>
               </div>
-              <Button onClick={handleExport}>
+              {/* Export button - visible on desktop only */}
+              <Button onClick={handleExport} className="hidden sm:flex">
                 <Download className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
@@ -160,6 +161,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                 </div>
               </CardContent>
             </Card>
+
+            {/* Export button - visible on mobile only, at bottom right */}
+            <div className="flex justify-end sm:hidden">
+              <Button onClick={handleExport}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
           </main>
         </div>
       </div>

@@ -95,7 +95,7 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
             <Menu className="h-5 w-5" />
           </Button>
         )}
-        <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">{title}</h1>
+        <h1 className="text-base lg:text-lg font-semibold text-foreground line-clamp-2">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
