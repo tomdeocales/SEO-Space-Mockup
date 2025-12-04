@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Plus, ExternalLink, FileText, Zap, Target, Clock } from "lucide-react"
 import { FormModal } from "@/components/ui/form-modal"
 import { useToast } from "@/components/ui/toast-banner"
+import { useFeatureAssignments } from "@/components/feature-assignments-provider"
 
 interface FeatureDetailProps {
   feature: Feature
@@ -20,8 +21,10 @@ interface FeatureDetailProps {
 
 export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const router = useRouter()
-  const parityStatus = getParityStatus(feature, competitor)
-  const priorityScore = getCompetitorPriority(feature, competitor)
+  const { getFeatureById, assignSprint } = useFeatureAssignments()
+  const featureData = getFeatureById(feature.id) ?? feature
+  const parityStatus = getParityStatus(featureData, competitor)
+  const priorityScore = getCompetitorPriority(featureData, competitor)
   const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
   const { showToast } = useToast()
 
@@ -37,6 +40,8 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
   const [adding, setAdding] = useState(false)
 
   const [showReassignModal, setShowReassignModal] = useState(false)
+
+  const currentSprint = featureData.sprint
 
   const getStatusBadge = () => {
     if (parityStatus === "full") {
@@ -72,40 +77,45 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
     cn("border border-border", isActive && "border-primary/50 shadow-sm bg-muted/40")
 
   const handleAddToRoadmap = () => {
-    if (feature.sprint) {
+    if (currentSprint) {
       // Feature already in roadmap, show reassign modal
+      setSelectedSprint(currentSprint.toString())
       setShowReassignModal(true)
     } else {
       // New addition, show add modal
+      setSelectedSprint("")
       setShowRoadmapModal(true)
     }
   }
 
   const handleConfirmAddToRoadmap = () => {
-    if (!selectedSprint) {
-      showToast("Please select a sprint", "error")
-      return
-    }
+    if (!selectedSprint) return
     setAdding(true)
     setTimeout(() => {
+      assignSprint(featureData.id, Number(selectedSprint))
       setAdding(false)
       setShowRoadmapModal(false)
-      showToast(`${feature.name} added to Sprint ${selectedSprint}`, "success")
-      router.push(`/roadmap?highlight=${feature.id}`)
+      showToast("Added to Roadmap", "success")
+      router.push(`/roadmap?highlight=${featureData.id}`)
     }, 800)
   }
 
   const handleConfirmReassign = () => {
-    if (!selectedSprint) {
-      showToast("Please select a sprint", "error")
-      return
-    }
+    if (!selectedSprint) return
     setAdding(true)
     setTimeout(() => {
+      const nextSprint = Number(selectedSprint)
+      if (currentSprint && nextSprint === currentSprint) {
+        setAdding(false)
+        setShowReassignModal(false)
+        showToast(`Feature is already in Sprint ${currentSprint}`, "info")
+        return
+      }
+      assignSprint(featureData.id, nextSprint)
       setAdding(false)
       setShowReassignModal(false)
-      showToast(`${feature.name} moved to Sprint ${selectedSprint}`, "success")
-      router.push(`/roadmap?highlight=${feature.id}`)
+      showToast("Sprint updated", "success")
+      router.push(`/roadmap?highlight=${featureData.id}`)
     }, 800)
   }
 
@@ -117,9 +127,9 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">{feature.name}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{featureData.name}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-2">
-            <Badge variant="outline">{feature.category}</Badge>
+            <Badge variant="outline">{featureData.category}</Badge>
             {getPriorityBadge()}
             {getStatusBadge()}
           </div>
@@ -151,21 +161,23 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                   SEMrush
                 </span>
                 <Badge
-                  variant={feature.semrush === 2 ? "outline" : feature.semrush === 1 ? "secondary" : "destructive"}
+                  variant={
+                    featureData.semrush === 2 ? "outline" : featureData.semrush === 1 ? "secondary" : "destructive"
+                  }
                   className="text-xs"
                 >
-                  {feature.semrush === 2 ? "Full" : feature.semrush === 1 ? "Partial" : "Missing"}
+                  {featureData.semrush === 2 ? "Full" : featureData.semrush === 1 ? "Partial" : "Missing"}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.semrushDescription}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{featureData.semrushDescription}</p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Inputs</h4>
                   <ul className="space-y-1">
-                    {feature.inputs.map((input, i) => (
+                    {featureData.inputs.map((input, i) => (
                       <li key={i} className="text-sm flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-foreground" />
                         {input}
@@ -176,7 +188,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                 <div>
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Outputs</h4>
                   <ul className="space-y-1">
-                    {feature.outputs.map((output, i) => (
+                    {featureData.outputs.map((output, i) => (
                       <li key={i} className="text-sm flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-foreground" />
                         {output}
@@ -190,7 +202,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   Job To Be Done
                 </h4>
-                <p className="text-sm bg-muted/50 rounded-lg p-3 italic">{feature.jtbd}</p>
+                <p className="text-sm bg-muted/50 rounded-lg p-3 italic">{featureData.jtbd}</p>
               </div>
 
               <div className="border border-dashed border-border rounded-lg p-6 flex items-center justify-center bg-muted/30">
@@ -215,21 +227,21 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                   peec
                 </span>
                 <Badge
-                  variant={feature.peec === 2 ? "outline" : feature.peec === 1 ? "secondary" : "destructive"}
+                  variant={featureData.peec === 2 ? "outline" : featureData.peec === 1 ? "secondary" : "destructive"}
                   className="text-xs"
                 >
-                  {feature.peec === 2 ? "Full" : feature.peec === 1 ? "Partial" : "Missing"}
+                  {featureData.peec === 2 ? "Full" : featureData.peec === 1 ? "Partial" : "Missing"}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.peecDescription}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{featureData.peecDescription}</p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Inputs</h4>
                   <ul className="space-y-1">
-                    {feature.inputs.map((input, i) => (
+                    {featureData.inputs.map((input, i) => (
                       <li key={i} className="text-sm flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-foreground" />
                         {input}
@@ -240,7 +252,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                 <div>
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Outputs</h4>
                   <ul className="space-y-1">
-                    {feature.outputs.map((output, i) => (
+                    {featureData.outputs.map((output, i) => (
                       <li key={i} className="text-sm flex items-center gap-2">
                         <span className="h-1 w-1 rounded-full bg-foreground" />
                         {output}
@@ -254,7 +266,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   Job To Be Done
                 </h4>
-                <p className="text-sm bg-muted/50 rounded-lg p-3 italic">{feature.jtbd}</p>
+                <p className="text-sm bg-muted/50 rounded-lg p-3 italic">{featureData.jtbd}</p>
               </div>
 
               <div className="border border-dashed border-border rounded-lg p-6 flex items-center justify-center bg-muted/30">
@@ -284,16 +296,16 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                 <Badge
                   variant="outline"
                   className={cn(
-                    feature.seoSpace === 2
+                    featureData.seoSpace === 2
                       ? "border-status-ahead/50 text-status-ahead bg-status-ahead/10"
-                      : feature.seoSpace === 1
+                      : featureData.seoSpace === 1
                         ? "border-status-partial/50 text-status-partial bg-status-partial/10"
                         : "border-status-behind/50 text-status-behind bg-status-behind/10",
                   )}
                 >
-                  {feature.seoSpace === 2 ? "Present" : feature.seoSpace === 1 ? "Partial" : "Missing"}
+                  {featureData.seoSpace === 2 ? "Present" : featureData.seoSpace === 1 ? "Partial" : "Missing"}
                 </Badge>
-                <span className="text-sm text-muted-foreground">{feature.description}</span>
+                <span className="text-sm text-muted-foreground">{featureData.description}</span>
               </div>
             </CardContent>
           </Card>
@@ -310,7 +322,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
               <div>
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Inputs</h4>
                 <ul className="space-y-1">
-                  {feature.inputs.map((input, i) => (
+                  {featureData.inputs.map((input, i) => (
                     <li key={i} className="text-sm flex items-center gap-2">
                       <span className="h-1 w-1 rounded-full bg-foreground" />
                       {input}
@@ -322,7 +334,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
               <div>
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Outputs</h4>
                 <ul className="space-y-1">
-                  {feature.outputs.map((output, i) => (
+                  {featureData.outputs.map((output, i) => (
                     <li key={i} className="text-sm flex items-center gap-2">
                       <span className="h-1 w-1 rounded-full bg-foreground" />
                       {output}
@@ -334,8 +346,8 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
               <div>
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Minimal UX</h4>
                 <p className="text-sm bg-muted/50 rounded-lg p-3">
-                  User enters {feature.inputs[0]?.toLowerCase()} → We display{" "}
-                  {feature.outputs.slice(0, 2).join(", ").toLowerCase()} with actionable insights and export options.
+                  User enters {featureData.inputs[0]?.toLowerCase()} → We display{" "}
+                  {featureData.outputs.slice(0, 2).join(", ").toLowerCase()} with actionable insights and export options.
                 </p>
               </div>
             </CardContent>
@@ -355,7 +367,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Effort</span>
                   <div className="mt-2">
                     <Badge variant="secondary" className="text-sm px-3 py-1 font-medium">
-                      {feature.effort === "S" ? "Small" : feature.effort === "M" ? "Medium" : "Large"}
+                      {featureData.effort === "S" ? "Small" : featureData.effort === "M" ? "Medium" : "Large"}
                     </Badge>
                   </div>
                 </div>
@@ -365,7 +377,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
                   </span>
                   <div className="mt-2">
                     <Badge variant="outline" className="text-sm px-3 py-1">
-                      {feature.sprint ? `Sprint ${feature.sprint}` : "TBD"}
+                      {featureData.sprint ? `Sprint ${featureData.sprint}` : "TBD"}
                     </Badge>
                   </div>
                 </div>
@@ -376,7 +388,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
           {/* CTA - Updated to show modal */}
           <Button size="lg" className="w-full" onClick={handleAddToRoadmap}>
             <Plus className="h-4 w-4 mr-2" />
-            {feature.sprint ? "Reassign Sprint" : "Add to Roadmap"}
+            {featureData.sprint ? "Reassign Sprint" : "Add to Roadmap"}
           </Button>
         </div>
       </div>
@@ -388,11 +400,10 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
         onSubmit={handleConfirmAddToRoadmap}
         submitText="Add to Roadmap"
         loading={adding}
+        submitDisabled={!selectedSprint}
       >
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Add <strong>{feature.name}</strong> to the product roadmap.
-          </p>
+          <p className="text-sm text-muted-foreground">Assign this feature to a sprint.</p>
           <div className="space-y-2">
             <Label>Target Sprint</Label>
             <Select value={selectedSprint} onValueChange={setSelectedSprint}>
@@ -410,7 +421,7 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Effort</span>
               <span className="font-medium">
-                {feature.effort === "S" ? "Small" : feature.effort === "M" ? "Medium" : "Large"}
+                {featureData.effort === "S" ? "Small" : featureData.effort === "M" ? "Medium" : "Large"}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm mt-1">
@@ -428,11 +439,11 @@ export function FeatureDetail({ feature, competitor }: FeatureDetailProps) {
         onSubmit={handleConfirmReassign}
         submitText="Reassign"
         loading={adding}
+        submitDisabled={!selectedSprint}
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            <strong>{feature.name}</strong> is currently in <strong>Sprint {feature.sprint}</strong>. Select a new
-            sprint to reassign.
+            This feature is already in <strong>Sprint {currentSprint}</strong>. Select a new sprint to reassign it.
           </p>
           <div className="space-y-2">
             <Label>New Sprint</Label>

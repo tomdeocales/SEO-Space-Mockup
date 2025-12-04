@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { ToastProvider } from "@/components/ui/toast-banner"
 import { AuthProvider } from "@/components/auth-provider"
 import { CompetitorProvider } from "@/components/competitor-provider"
+import { FeatureAssignmentsProvider } from "@/components/feature-assignments-provider"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -43,7 +44,9 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <AuthProvider>
           <ToastProvider>
-            <CompetitorProvider>{children}</CompetitorProvider>
+            <CompetitorProvider>
+              <FeatureAssignmentsProvider>{children}</FeatureAssignmentsProvider>
+            </CompetitorProvider>
           </ToastProvider>
           <Analytics />
         </AuthProvider>

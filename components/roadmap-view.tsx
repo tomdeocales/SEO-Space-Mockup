@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { features, type Feature, getCompetitorPriority } from "@/lib/data"
+import { type Feature, getCompetitorPriority } from "@/lib/data"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Columns3 } from "lucide-react"
+import { useFeatureAssignments } from "@/components/feature-assignments-provider"
 
 interface RoadmapViewProps {
   competitor: "semrush" | "peec"
@@ -18,8 +19,9 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
   const searchParams = useSearchParams()
   const highlightId = searchParams.get("highlight")
   const competitorLabel = competitor === "semrush" ? "SEMrush" : "peec"
-
-  const [activeTab, setActiveTab] = useState("timeline")
+  const { features } = useFeatureAssignments()
+  const initialView = searchParams.get("view") === "kanban" ? "kanban" : "timeline"
+  const [activeTab, setActiveTab] = useState(initialView)
 
   const sprintFeatures = {
     1: features.filter((f) => f.sprint === 1),
@@ -32,6 +34,22 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
     planned: features.filter((f) => f.roadmapStatus === "planned"),
     in_progress: features.filter((f) => f.roadmapStatus === "in_progress"),
     shipped: features.filter((f) => f.roadmapStatus === "shipped"),
+  }
+
+  useEffect(() => {
+    const view = searchParams.get("view")
+    if ((view === "timeline" || view === "kanban") && view !== activeTab) {
+      setActiveTab(view)
+    }
+  }, [searchParams, activeTab])
+
+  const handleTabChange = (value: string) => {
+    const next = value === "kanban" ? "kanban" : "timeline"
+    setActiveTab(next)
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("view", next)
+    router.replace(`?${params.toString()}`, { scroll: false })
   }
 
   const FeatureCard = ({ feature, isHighlighted }: { feature: Feature; isHighlighted: boolean }) => {
@@ -100,7 +118,7 @@ export function RoadmapView({ competitor }: RoadmapViewProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="mb-6">
             <TabsTrigger value="timeline" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />

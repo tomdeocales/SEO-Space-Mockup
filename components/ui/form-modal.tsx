@@ -14,6 +14,7 @@ interface FormModalProps {
   onSubmit?: () => void
   submitText?: string
   loading?: boolean
+  submitDisabled?: boolean
 }
 
 export function FormModal({
@@ -24,6 +25,7 @@ export function FormModal({
   onSubmit,
   submitText = "Submit",
   loading = false,
+  submitDisabled = false,
 }: FormModalProps) {
   if (!open) return null
 
@@ -46,7 +48,7 @@ export function FormModal({
             <Button variant="outline" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button onClick={onSubmit} disabled={loading}>
+            <Button onClick={onSubmit} disabled={loading || submitDisabled}>
               {loading ? "Submitting..." : submitText}
             </Button>
           </CardFooter>
