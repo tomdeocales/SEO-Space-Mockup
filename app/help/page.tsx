@@ -53,6 +53,7 @@ const docLinks = [
 
 export default function HelpPage() {
   const { competitor, isSwitching, setCompetitor } = useCompetitor()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showTicketModal, setShowTicketModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
@@ -87,12 +88,17 @@ export default function HelpPage() {
           onCompetitorChange={setCompetitor}
           isLoading={isSwitching}
           disableCompetitorToggle
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
 
-        <div className="pl-64">
-          <TopBar title="Help & Support" />
+        <div className="lg:pl-64">
+          <TopBar
+            title="Help & Support"
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
 
-          <main className="p-6 space-y-6">
+          <main className="p-4 sm:p-6 space-y-6">
             {isSwitching ? (
               <PageLoader />
             ) : (

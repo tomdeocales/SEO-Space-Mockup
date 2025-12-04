@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { TopBar } from "@/components/top-bar"
 import { ParityRadarChart } from "@/components/parity-radar-chart"
@@ -12,6 +13,7 @@ import { useCompetitor } from "@/components/competitor-provider"
 
 export default function ParityOverview() {
   const { competitor, isSwitching, setCompetitor } = useCompetitor()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const parityScore = getOverallParityScore(competitor)
   const featuresBehind = getFeaturesBehind(competitor)
@@ -21,12 +23,21 @@ export default function ParityOverview() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-white">
-        <Sidebar competitor={competitor} onCompetitorChange={setCompetitor} isLoading={isSwitching} />
+        <Sidebar
+          competitor={competitor}
+          onCompetitorChange={setCompetitor}
+          isLoading={isSwitching}
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+        />
 
-        <div className="pl-64">
-          <TopBar title="Competitive Parity Overview" />
+        <div className="lg:pl-64">
+          <TopBar
+            title="Competitive Parity Overview"
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
 
-          <main className="p-6 space-y-6">
+          <main className="p-4 sm:p-6 space-y-6">
             {isSwitching ? (
               <PageLoader />
             ) : (

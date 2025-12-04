@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, User, Settings, LogOut } from "lucide-react"
+import { Bell, User, Settings, LogOut, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,9 +16,10 @@ import { useAuth } from "@/components/auth-provider"
 
 interface TopBarProps {
   title: string
+  onMenuClick?: () => void
 }
 
-export function TopBar({ title }: TopBarProps) {
+export function TopBar({ title, onMenuClick }: TopBarProps) {
   const router = useRouter()
   const { logout } = useAuth()
 
@@ -81,8 +82,21 @@ export function TopBar({ title }: TopBarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-white px-6">
-      <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-white px-4 lg:px-6">
+      <div className="flex items-center gap-3">
+        {/* Hamburger Menu - Mobile Only */}
+        {onMenuClick && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden h-9 w-9"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+        <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">{title}</h1>
+      </div>
 
       <div className="flex items-center gap-2">
         <DropdownMenu>

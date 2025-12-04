@@ -26,6 +26,7 @@ const mockReports = [
 
 export default function ReportsPage() {
   const { competitor, isSwitching, setCompetitor } = useCompetitor()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [reportType, setReportType] = useState("")
   const [generating, setGenerating] = useState(false)
@@ -58,12 +59,17 @@ export default function ReportsPage() {
           onCompetitorChange={setCompetitor}
           isLoading={isSwitching}
           disableCompetitorToggle
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
 
-        <div className="pl-64">
-          <TopBar title="Reports" />
+        <div className="lg:pl-64">
+          <TopBar
+            title="Reports"
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
 
-          <main className="p-6">
+          <main className="p-4 sm:p-6">
             {isSwitching ? (
               <PageLoader />
             ) : (

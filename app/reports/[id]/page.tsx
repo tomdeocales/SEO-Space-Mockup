@@ -1,6 +1,6 @@
 "use client"
 
-import { use } from "react"
+import { use, useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { TopBar } from "@/components/top-bar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { useCompetitor } from "@/components/competitor-provider"
 export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const { competitor, isSwitching, setCompetitor } = useCompetitor()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { showToast } = useToast()
   const router = useRouter()
 
@@ -33,12 +34,17 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
           onCompetitorChange={setCompetitor}
           isLoading={isSwitching}
           disableCompetitorToggle
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
 
-        <div className="pl-64">
-          <TopBar title="Report Detail" />
+        <div className="lg:pl-64">
+          <TopBar
+            title="Report Detail"
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
 
-          <main className="p-6 space-y-6">
+          <main className="p-4 sm:p-6 space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9">

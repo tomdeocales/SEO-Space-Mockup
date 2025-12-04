@@ -17,6 +17,7 @@ import { useCompetitor } from "@/components/competitor-provider"
 
 export default function SettingsPage() {
   const { competitor, isSwitching, setCompetitor } = useCompetitor()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
@@ -47,12 +48,17 @@ export default function SettingsPage() {
           onCompetitorChange={setCompetitor}
           isLoading={isSwitching}
           disableCompetitorToggle
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
 
-        <div className="pl-64">
-          <TopBar title="Settings" />
+        <div className="lg:pl-64">
+          <TopBar
+            title="Settings"
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
 
-          <main className="p-6 space-y-6">
+          <main className="p-4 sm:p-6 space-y-6">
             {isSwitching ? (
               <PageLoader />
             ) : (
